@@ -1,0 +1,7 @@
+"perc_over_65_2020"
+"adults_per_family_doctor_2019"
+"average_beds_hospital_2019"
+"average_students_classroom_2019"
+"average_employees_firm_2018"
+"pm10_2019"
+"area_before"
