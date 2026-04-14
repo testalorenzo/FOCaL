@@ -2,7 +2,7 @@
 
 ### Functional Outcome Causal Learning
 
-The repo contains the code to perform function-on-scalar doubly-robust regression. The reader can find scripts for the following use:
+The repo contains the code to run **FOCaL**, a doubly-robust method to learn heterogeneous functional treatment effects. The reader can find scripts for the following use:
 
 1) **FOCaL**, a class object that allows to call the following functions:
     * *fit*: train the nuisance functions and compute pseudo-outcomes
