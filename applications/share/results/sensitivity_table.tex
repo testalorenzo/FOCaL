@@ -1,0 +1,40 @@
+\begin{tabular}{lcccccc}
+\toprule
+ & \multicolumn{3}{c}{CASP} & \multicolumn{3}{c}{Mobility index} \\ \cmidrule(lr){2-4}\cmidrule(lr){5-7}
+Analysis & $\|\hat\theta\|$ & radius & rejects & $\|\hat\theta\|$ & radius & rejects \\
+\midrule
+\multicolumn{7}{l}{\textit{Hypertension at enrolment}} \\
+Main analysis (boosting, fPCA 99\%, 6 knots, seed 0) & 0.86 & 0.55 & yes & 0.159 & 0.068 & yes \\
+fPCA 90\% of the variance & 0.86 & 0.55 & yes & 0.159 & 0.068 & yes \\
+fPCA 95\% of the variance & 0.86 & 0.55 & yes & 0.159 & 0.068 & yes \\
+Third stage with 10 knots & 0.86 & 0.55 & yes & 0.159 & 0.068 & yes \\
+Third stage with 15 knots & 0.86 & 0.55 & yes & 0.159 & 0.068 & yes \\
+Cross-fitting seed 1 & 0.63 & 0.57 & yes & 0.144 & 0.068 & yes \\
+Cross-fitting seed 2 & 0.72 & 0.60 & yes & 0.159 & 0.075 & yes \\
+Linear / logistic nuisance models & 0.69 & 0.58 & yes & 0.149 & 0.067 & yes \\
+Random-forest nuisance models & 0.69 & 0.57 & yes & 0.140 & 0.066 & yes \\
+Neural-network / logistic nuisance models (previous version) & 0.67 & 0.57 & yes & 0.153 & 0.069 & yes \\
+Re-smoothed curves, GCV & 0.87 & 0.55 & yes & 0.160 & 0.067 & yes \\
+Re-smoothed curves, $\lambda=10$ & 0.87 & 0.55 & yes & 0.160 & 0.067 & yes \\
+Re-smoothed curves, $\lambda=10^3$ & 0.86 & 0.55 & yes & 0.160 & 0.067 & yes \\
+Re-smoothed curves, $\lambda=10^5$ & 0.85 & 0.53 & yes & 0.163 & 0.064 & yes \\
+Condition at every wave vs never (previous design) & 1.36 & 0.63 & yes & 0.228 & 0.073 & yes \\
+\midrule
+\multicolumn{7}{l}{\textit{High cholesterol at enrolment}} \\
+Main analysis (boosting, fPCA 99\%, 6 knots, seed 0) & 0.74 & 0.60 & yes & 0.081 & 0.076 & yes \\
+fPCA 90\% of the variance & 0.74 & 0.60 & yes & 0.081 & 0.076 & yes \\
+fPCA 95\% of the variance & 0.74 & 0.60 & yes & 0.081 & 0.076 & yes \\
+Third stage with 10 knots & 0.74 & 0.60 & yes & 0.081 & 0.076 & yes \\
+Third stage with 15 knots & 0.74 & 0.60 & yes & 0.081 & 0.076 & yes \\
+Cross-fitting seed 1 & 0.72 & 0.63 & yes & 0.071 & 0.073 & no \\
+Cross-fitting seed 2 & 0.70 & 0.60 & yes & 0.073 & 0.074 & no \\
+Linear / logistic nuisance models & 0.72 & 0.64 & yes & 0.076 & 0.070 & yes \\
+Random-forest nuisance models & 0.68 & 0.63 & yes & 0.065 & 0.073 & no \\
+Neural-network / logistic nuisance models (previous version) & 0.73 & 0.62 & yes & 0.055 & 0.070 & no \\
+Re-smoothed curves, GCV & 0.74 & 0.60 & yes & 0.081 & 0.076 & yes \\
+Re-smoothed curves, $\lambda=10$ & 0.74 & 0.60 & yes & 0.080 & 0.076 & yes \\
+Re-smoothed curves, $\lambda=10^3$ & 0.72 & 0.60 & yes & 0.081 & 0.076 & yes \\
+Re-smoothed curves, $\lambda=10^5$ & 0.72 & 0.59 & yes & 0.080 & 0.073 & yes \\
+Condition at every wave vs never (previous design) & 1.14 & 0.61 & yes & 0.141 & 0.074 & yes \\
+\bottomrule
+\end{tabular}

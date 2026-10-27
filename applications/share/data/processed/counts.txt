@@ -1,0 +1,11 @@
+n = 1518 subjects, m = 192 months
+
+hypertension:
+  baseline status A = 1: 419, A = 0: 1099
+  condition at every wave: 419; never: 577; free at baseline with later onset: 522 (median onset month 72)
+  status monotone in time for all subjects: True
+
+high_cholesterol:
+  baseline status A = 1: 313, A = 0: 1205
+  condition at every wave: 313; never: 747; free at baseline with later onset: 458 (median onset month 96)
+  status monotone in time for all subjects: True

@@ -1,56 +1,44 @@
+"""
+simple_example.py -- FOCaL on simple synthetic data: fit, predict and build a global confidence set.
+
+Univariate covariate X, treatment A assigned with probability depending on X, functional outcome on
+a grid of 20 points with a constant treatment effect of 2. Nuisance functions: linear regression
+(outcome regressions, fit on functional principal component scores) and logistic regression
+(propensity score). Third stage: least squares on (1, x), a linear smoother, so that the L2
+confidence sets of the paper are available.
+"""
+
 import numpy as np
 from sklearn.linear_model import LinearRegression, LogisticRegression
-from FOCaL import FOCaL
+from FOCaL import FOCaL, FixedBasisLS
 
-
-# FOCaL fit and predict with simple synthetic data:
-# Univariate problem (X)
-# Random treatment based on X (A)
-# Constant effect over time (tau)
-# Linear regression and logistic regression as nuisance estimators
-
-n = 200
-n_time = 20
+n, n_time = 500, 20
 rng = np.random.default_rng(0)
-
 X = rng.normal(size=(n, 1))
-
-true_propensity_linear = -X[:, 0]
-true_pi = 1 / (1 + np.exp(-true_propensity_linear))
-A = rng.binomial(1, true_pi, n)
-
+A = rng.binomial(1, 1 / (1 + np.exp(X[:, 0])))            # P(A = 1 | X) = logit^{-1}(-X)
 t = np.linspace(0, 1, n_time)
+tau = 2.0 * np.ones(n_time)                              # constant effect over time
+noise = rng.normal(0, 0.5, size=(n, n_time))
+Y0 = X[:, [0]] + np.sin(2 * np.pi * t) + noise           # baseline depends on X and on time
+Y = Y0 + A[:, None] * tau
 
-tau = np.ones(n_time) * 2.0   
+# Stage 1-3: cross-fitted nuisances, doubly robust pseudo-outcomes, third stage on (1, x)
+focal = FOCaL(nuisance_mu=LinearRegression(), nuisance_pi=LogisticRegression(),
+              final_regression=FixedBasisLS(), fpca=2, fpca_third_stage=False, eps=0.01)
+focal.fit(X, X, A, Y, n_folds=5, random_state=0)
 
-Y = np.zeros((n, n_time))
-for i in range(n):
-    baseline = X[i, 0]        
-    noise = rng.normal(0, 0.1, size=n_time)
+# F-CATE at new covariate values and FATE
+X_new = np.array([[-1.0], [0.0], [1.0]])
+tau_hat = focal.predict(X_new)                           # (3, n_time)
+print('true effect (first 5 points):', tau[:5])
+print('estimated F-CATE at x = 0 (first 5 points):', tau_hat[1, :5].round(2))
+print('estimated FATE (first 5 points):', focal.get_FATE()[:5].round(2))
 
-    Y0 = baseline + noise
-    Y1 = baseline + tau + noise
-
-    Y[i] = A[i]*Y1 + (1-A[i])*Y0
-
-
-
-mu_model = LinearRegression()
-pi_model = LogisticRegression()
-final_model = LinearRegression()
-
-
-# Call the Class FOCaL
-focal = FOCaL(mu_model, pi_model, final_model, fpca=2)
-
-# Fit the data
-focal.fit(X, X, A, Y, n_folds=2)
-
-
-# Predict on the same input
-tau_hat = focal.predict(X)
-
-
-# You can also check the results
-print("True tau (first 5):", tau[:5])
-print("Estimated tau (first individual, first 5):", tau_hat[0, :5])
+# 95% global confidence sets (L2 balls): radius, and whether the true curve lies in the set
+dt = 1.0 / (n_time - 1)                                  # quadrature weight of the grid on [0, 1]
+cs = focal.confidence_set(X_new, alpha=0.05, dt=dt)
+for k, x in enumerate(X_new[:, 0]):
+    inside = np.sqrt(dt * ((tau_hat[k] - tau) ** 2).sum()) <= cs['radius'][k]
+    print(f'x = {x:+.0f}: L2 radius {cs["radius"][k]:.3f}, true curve inside the set: {inside}')
+fcs = focal.fate_confidence_set(alpha=0.05, dt=dt)
+print(f'FATE: L2 radius {fcs["radius"][0]:.3f}')

@@ -1,0 +1,31 @@
+outcome,analysis,FATE_L2,FATE_radius,FATE_reject,FATE_max_abs,FATE_max_dev_from_main,cut_men_q10_reject,cut_men_q50_reject,cut_men_q90_reject,cut_women_q10_reject,cut_women_q50_reject,cut_women_q90_reject
+casp,"main (fPCA 99%, 6 knots, seed 0)",0.7387848533887562,0.6018119079479995,True,1.06924124587429,0.0,False,False,False,False,False,False
+casp,fPCA 90%,0.7386293472549549,0.6014726641999453,True,1.0877369962875645,0.023019708799931704,False,False,False,False,False,False
+casp,fPCA 95%,0.7385466674282667,0.6016849007806845,True,1.0809003525225587,0.028359664486936387,False,False,False,False,False,False
+casp,10 knots,0.7387848533887562,0.6018119079479995,True,1.06924124587429,0.0,False,False,False,False,False,False
+casp,15 knots,0.7387848533887562,0.6018119079479995,True,1.06924124587429,0.0,False,False,False,False,False,False
+casp,seed 1,0.7226313506246097,0.6309273374086674,True,0.9953115123368411,0.11791248124040804,False,False,False,False,False,False
+casp,seed 2,0.7035906936083463,0.6025561551079621,True,0.9915746157208715,0.07766663015341846,False,False,False,False,False,False
+casp,"re-smoothed curves, GCV",0.7402670841147944,0.6027307542620954,True,1.065487766864978,0.01849066650853859,False,False,False,False,False,False
+casp,"re-smoothed curves, lambda=1e1",0.7402352631875153,0.6028277154409304,True,1.0674165921085477,0.018385610637719263,False,False,False,False,False,False
+casp,"re-smoothed curves, lambda=1e3",0.7207519898999184,0.5979980427396184,True,0.9961794901701627,0.07306175570412721,False,False,False,False,False,False
+casp,"re-smoothed curves, lambda=1e5",0.7198893109119681,0.5913046657694908,True,0.9614653082064087,0.12988783283390137,False,False,False,False,False,False
+casp,linear / logistic nuisances,0.7231603753276963,0.6400130833714278,True,0.9993951068772946,0.09748529881471668,False,False,False,False,False,False
+casp,random-forest nuisances,0.6810122138447535,0.6260295254006621,True,0.8966160243783182,0.1857516233899792,False,False,False,False,False,False
+casp,neural-network nuisances (previous version),0.7276185545437924,0.6194567649131012,True,0.9666321717349282,0.10326191246883287,False,False,False,False,False,False
+casp,secondary: condition at every wave vs never,1.1399979876990534,0.6133581497034243,True,1.4618037278510778,0.5608551112365209,False,False,False,False,False,False
+mobility,"main (fPCA 99%, 6 knots, seed 0)",0.08115902015976355,0.0762308368973282,True,0.10017814172140745,0.0,False,False,False,False,False,False
+mobility,fPCA 90%,0.0812015586316532,0.07616749734942105,True,0.09852746138016973,0.005928036570158904,False,False,False,False,False,False
+mobility,fPCA 95%,0.08113161601388942,0.07623265250099721,True,0.0988964132313095,0.004663255405861405,False,False,False,False,False,False
+mobility,10 knots,0.08115902015976355,0.0762308368973282,True,0.10017814172140745,0.0,False,False,False,False,False,False
+mobility,15 knots,0.08115902015976355,0.0762308368973282,True,0.10017814172140745,0.0,False,False,False,False,False,False
+mobility,seed 1,0.0714900829127643,0.07322232537150142,False,0.08660098545110546,0.035708477218898624,False,False,False,False,False,False
+mobility,seed 2,0.07299409336316595,0.07379667129243218,False,0.09462791841673125,0.029193390823267884,False,False,False,False,False,False
+mobility,"re-smoothed curves, GCV",0.08054111625562814,0.07602352656453425,True,0.09909620898592021,0.0013998859538470743,False,False,False,False,False,False
+mobility,"re-smoothed curves, lambda=1e1",0.08010032411719871,0.07593127138731579,True,0.09798268775210059,0.002195453969306857,False,False,False,False,False,False
+mobility,"re-smoothed curves, lambda=1e3",0.08118709778924511,0.0755501614608509,True,0.09800456530725211,0.007292751738665615,False,False,False,False,False,False
+mobility,"re-smoothed curves, lambda=1e5",0.07964898706791836,0.07319266133174926,True,0.08536944795100966,0.01635661744604,False,False,False,False,False,False
+mobility,linear / logistic nuisances,0.076398735860334,0.0702018535484455,True,0.09029024817994234,0.037278580105279846,False,False,False,False,False,False
+mobility,random-forest nuisances,0.06486420906180301,0.07273576435141094,False,0.08222526249509671,0.028768995314875853,False,False,False,False,False,False
+mobility,neural-network nuisances (previous version),0.05537973146063651,0.069921154959821,False,0.07114175946753913,0.06881528609246992,False,False,False,False,False,False
+mobility,secondary: condition at every wave vs never,0.14148955359467438,0.07418475437588207,True,0.18050354760274806,0.08399617828450494,False,False,False,False,False,False

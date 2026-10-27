@@ -1,0 +1,4 @@
+propensity quantiles 1/5/25/50/75/95/99%: [0.133, 0.42, 0.569, 0.668, 0.815, 0.917, 0.935]
+share with pi_hat < 0.05: 0.000, > 0.95: 0.002
+share at the clipping bounds (0.02, 0.98): 0.000
+treated share: 0.668 (n = 19864)

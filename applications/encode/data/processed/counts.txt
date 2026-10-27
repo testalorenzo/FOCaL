@@ -1,0 +1,8 @@
+genes in GTF (all types, all contigs)	58721
+protein-coding on chr1-22, chrX	19864
+with a transcript-based TSS	19864
+with an RNA-seq quantification	19864
+with the full 4-kb window inside the chromosome	19864
+final sample size n	19864
+treated	13266
+treated share	0.6678

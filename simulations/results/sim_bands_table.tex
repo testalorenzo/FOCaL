@@ -1,0 +1,39 @@
+% ---------------------------------------------------------------------------
+% Supplementary table: inference procedures compared in the base simulation design (code/table_bands.py,
+% from code/results/summary_coverage_base.csv). Whole block typeset in teal (revision).
+% ---------------------------------------------------------------------------
+{\color{teal}
+\begin{table}[h]
+    \centering
+    \caption{Inference procedures compared in the base simulation design (1000 repetitions, $n = 5000$). For \FOCAL{}, the empirical coverage of the true curve by the 95\% $\Ltwo$ confidence set and the average radius of the set. For the pointwise scalar DR-learner, which fits separate nuisance models and a separate third stage at each of the 100 grid points, three grid bands built from its pointwise standard errors: pointwise 95\% intervals (coverage = the true curve lies inside the interval at every grid point), a band calibrated on the $(1-\alpha)$-quantile of the maximum over the grid of the absolute studentized Gaussian process (max-$t$), and a Bonferroni band; width is the average width over the grid. For the basis-wise scalar DR-learner, which applies the scalar DR-learner to each of the 10 functional principal component scores (a special case of \FOCAL{} with a third stage on a fixed basis), the coverage of the vector of true scores by Bonferroni-adjusted intervals (its width is in the space of the scores and is not comparable). Targets: the FATE and the F-CATE at the 10th, 50th and 90th percentiles of $X_1$ with the other covariates at zero. Pointwise intervals undercover the whole curve by construction; the max-$t$ band and the $\Ltwo$ set reach nominal coverage whenever at least one nuisance model is correct; the Bonferroni band is conservative and about 30\% wider than the max-$t$ band. Under double misspecification, all procedures fail at the FATE and the median profile, where the bias is largest.}
+    \label{tab:sim_bands}
+    \footnotesize\setlength{\tabcolsep}{4pt}
+\begin{tabular}{llccccccccc}
+\toprule
+ & & \multicolumn{2}{c}{\FOCAL{}, $\Ltwo$ set} & \multicolumn{2}{c}{pointwise} & \multicolumn{2}{c}{max-$t$} & \multicolumn{2}{c}{Bonferroni} & basis-wise \\
+\cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}\cmidrule(lr){9-10}\cmidrule(lr){11-11}
+Scenario & Target & cov. & radius & cov. & width & cov. & width & cov. & width & cov. \\
+\midrule
+Correct specification & FATE & 0.96 & 0.59 & 0.77 & 1.44 & 0.95 & 1.95 & 1.00 & 2.55 & 0.96 \\
+ & F-CATE, $X_1$ at q10 & 0.94 & 1.10 & 0.72 & 2.58 & 0.94 & 3.47 & 0.99 & 4.58 & 0.94 \\
+ & F-CATE, $X_1$ at q50 & 0.95 & 0.57 & 0.76 & 1.35 & 0.96 & 1.82 & 1.00 & 2.40 & 0.96 \\
+ & F-CATE, $X_1$ at q90 & 0.96 & 1.09 & 0.76 & 2.56 & 0.95 & 3.45 & 1.00 & 4.55 & 0.95 \\
+\midrule
+Regression misspecified & FATE & 0.98 & 1.94 & 0.93 & 3.97 & 0.98 & 4.75 & 1.00 & 7.06 & 0.96 \\
+ & F-CATE, $X_1$ at q10 & 0.94 & 5.54 & 0.87 & 11.11 & 0.92 & 12.62 & 0.99 & 19.73 & 0.94 \\
+ & F-CATE, $X_1$ at q50 & 0.99 & 1.93 & 0.93 & 3.93 & 0.98 & 4.65 & 1.00 & 6.97 & 0.96 \\
+ & F-CATE, $X_1$ at q90 & 0.90 & 5.51 & 0.84 & 10.91 & 0.90 & 12.61 & 0.98 & 19.38 & 0.91 \\
+\midrule
+Propensity misspecified & FATE & 0.97 & 0.76 & 0.77 & 1.80 & 0.96 & 2.44 & 1.00 & 3.20 & 0.96 \\
+ & F-CATE, $X_1$ at q10 & 0.96 & 1.52 & 0.72 & 3.44 & 0.95 & 4.61 & 1.00 & 6.10 & 0.96 \\
+ & F-CATE, $X_1$ at q50 & 0.97 & 0.74 & 0.78 & 1.73 & 0.96 & 2.33 & 1.00 & 3.07 & 0.96 \\
+ & F-CATE, $X_1$ at q90 & 0.98 & 2.47 & 0.81 & 5.48 & 0.98 & 7.32 & 1.00 & 9.73 & 0.99 \\
+\midrule
+Fully misspecified & FATE & 0.00 & 5.04 & 0.00 & 9.75 & 0.00 & 10.96 & 0.05 & 17.32 & 0.01 \\
+ & F-CATE, $X_1$ at q10 & 0.92 & 12.66 & 0.71 & 24.33 & 0.75 & 26.80 & 0.90 & 43.21 & 0.87 \\
+ & F-CATE, $X_1$ at q50 & 0.00 & 4.98 & 0.00 & 9.64 & 0.00 & 10.81 & 0.05 & 17.11 & 0.01 \\
+ & F-CATE, $X_1$ at q90 & 0.43 & 21.99 & 0.28 & 42.07 & 0.46 & 46.00 & 1.00 & 74.71 & 0.92 \\
+\bottomrule
+\end{tabular}
+\end{table}
+}

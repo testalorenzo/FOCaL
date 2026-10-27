@@ -1,0 +1,5 @@
+propensity quantiles 1/5/25/50/75/95/99%: [0.106, 0.126, 0.174, 0.201, 0.236, 0.294, 0.337]
+share with pi_hat < 0.05: 0.000, > 0.95: 0.000
+share at the clipping bounds (0.02, 0.98): 0.000
+treated share: 0.206 (n = 1518)
+fPCA components per training fold (99% variance): [np.int64(6), np.int64(6), np.int64(6), np.int64(6), np.int64(6)]

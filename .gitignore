@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.DS_Store
+*/batch_logs/*
+!*/batch_logs/.gitkeep
+applications/*/batch_logs/*
+!applications/*/batch_logs/.gitkeep
+applications/encode/data/raw/*
+!applications/encode/data/raw/.gitkeep
+applications/share/data/processed/*.npz
+applications/share/results/*.npz
+*/data/temp/
