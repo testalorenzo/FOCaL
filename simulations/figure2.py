@@ -36,7 +36,7 @@ SHIFT = {'Correct specification': 0, 'Fully misspecified': 0,
 N_MARKERS = 20
 
 # colors of the methods in panel (e)
-METHOD_COLORS = {'FOCaL': 'tab:red', 'Outcome regression': 'tab:blue', 'IPW': 'tab:green'}
+METHOD_COLORS = {'FOCaL': '#C52C2C', 'Outcome regression': '#3A7DC0', 'IPW': '#57AF41'}
 
 GRID_KW = dict(alpha=0.35, lw=0.8)
 
