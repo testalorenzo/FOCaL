@@ -37,12 +37,12 @@ plt.rcParams.update({'font.size': 12, 'axes.titlesize': 14, 'axes.labelsize': 12
                      'xtick.labelsize': 11, 'ytick.labelsize': 11, 'legend.fontsize': 11})
 
 METHOD_COLORS = {
-    'FOCaL': 'tab:red',
-    'Outcome regression': 'tab:blue',
-    'FoS-interaction': 'tab:green',
-    'IPW': 'C4',
-    'Pointwise DR': 'C1',
-    'Basis-wise DR': 'C5'
+    'FOCaL': '#C52C2C',
+    'Outcome regression': '#3A7DC0',
+    'FoS-interaction': '#6B4A39',
+    'IPW': '#57AF41',
+    'Pointwise DR': '#CB832A',
+    'Basis-wise DR': '#57AF41'
 }
 
 GRID_KW = dict(alpha=0.35, lw=0.8)
