@@ -117,6 +117,22 @@ SCENARIOS = {
 
 METHODS = ['FOCaL', 'Pointwise DR', 'Basis-wise DR', 'Plug-in', 'IPW', 'FoS-interaction']
 
+method_palette = {
+    'FOCaL': "#C52C2C",           
+    'IPW': "#57AF41",        
+    'Basis-wise DR': "#6B30B8",   
+    'Pointwise DR': "#CB832A",    
+    'Plug-in': "#3A7DC0",         
+    'FoS-interaction': "#6B4A39"  
+}
+
+profile_palette = {
+    'FATE': "#C52C2C",
+    'X1 q10': "#CB832A",
+    'X1 q50': "#57AF41",
+    'X1 q90': "#3A7DC0"
+}
+
 # X_1 quantiles of the profiles at which coverage is assessed (other covariates at 0)
 PROFILE_QUANTILES = (0.1, 0.5, 0.9)
 
@@ -523,18 +539,28 @@ def make_figure(metrics, coverage, path):
     base_m = metrics[metrics.design == 'base']
     base_c = coverage[(coverage.design == 'base') & (coverage.method == 'FOCaL')]
     fig, axes = plt.subplots(1, 3, figsize=(18, 5))
-    sns.boxplot(data=base_m, x='scenario', y='ARMSE', hue='method', showfliers=False, ax=axes[0])
+    sns.boxplot(
+        data=base_m, x='scenario', y='ARMSE', hue='method',
+        palette=method_palette,
+         showfliers=False, ax=axes[0])
     axes[0].set_title('F-CATE error (ARMSE)')
     axes[0].tick_params(axis='x', rotation=20)
-    sns.boxplot(data=base_m, x='scenario', y='FATE_error', hue='method', showfliers=False, ax=axes[1])
+    sns.boxplot(data=base_m, x='scenario', y='FATE_error', hue='method',
+                palette=method_palette,
+                showfliers=False, ax=axes[1])
     axes[1].set_title('FATE error')
     axes[1].tick_params(axis='x', rotation=20)
     cov_tab = base_c.groupby(['scenario', 'profile'])['cover_L2'].mean().reset_index()
-    sns.barplot(data=cov_tab, x='scenario', y='cover_L2', hue='profile', ax=axes[2])
+    sns.barplot(data=cov_tab, x='scenario', y='cover_L2', hue='profile',
+                palette=profile_palette,
+                ax=axes[2])
     axes[2].axhline(1 - BASE['alpha'], color='k', ls='--')
     axes[2].set_ylim(0, 1)
     axes[2].set_title('Coverage of the L2 confidence set (FOCaL)')
     axes[2].tick_params(axis='x', rotation=20)
+    for ax in axes:
+        ax.set_axisbelow(True)
+        ax.grid(axis='y', linestyle='--', alpha=0.5)
     fig.tight_layout()
     fig.savefig(path)
 
@@ -548,16 +574,18 @@ if __name__ == '__main__':
     parser.add_argument('--variations', action='store_true', help='run the one-factor design variations')
     parser.add_argument('--only', type=str, default=None, help='comma-separated subset of variation names')
     parser.add_argument('--n', type=int, default=None, help='override the base sample size (for quick tests)')
-    parser.add_argument('--out', type=str, default='results', help='output directory (use a scratch directory for tests)')
+    parser.add_argument('--out', type=str, default=None, help='output directory (default: <script dir>/results)')
     parser.add_argument('--n_jobs', type=int, default=max(1, os.cpu_count() - 2), help='parallel processes over trials')
     args = parser.parse_args()
 
-    out = args.out
+    here = os.path.dirname(os.path.abspath(__file__))
+    out = os.path.abspath(args.out) if args.out else os.path.join(here, 'results')
+    log_dir = os.path.join(here, 'batch_logs')
     os.makedirs(out, exist_ok=True)
-    os.makedirs('batch_logs', exist_ok=True)
+    os.makedirs(log_dir, exist_ok=True)
     stamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s',
-                        handlers=[logging.FileHandler(f'batch_logs/simulations_{stamp}.log'), logging.StreamHandler()])
+                        handlers=[logging.FileHandler(f'{log_dir}/simulations_{stamp}.log'), logging.StreamHandler()])
     log = logging.getLogger('simulations')
 
     cfg = dict(BASE, n_jobs=args.n_jobs)

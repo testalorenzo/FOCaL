@@ -36,8 +36,22 @@ from simulations import SCENARIOS  # noqa: E402
 plt.rcParams.update({'font.size': 12, 'axes.titlesize': 14, 'axes.labelsize': 12,
                      'xtick.labelsize': 11, 'ytick.labelsize': 11, 'legend.fontsize': 11})
 
-METHOD_COLORS = {'FOCaL': 'C0', 'Outcome regression': 'C2', 'FoS-interaction': 'C3', 'IPW': 'C4',
-                 'Pointwise DR': 'C1', 'Basis-wise DR': 'C5'}
+METHOD_COLORS = {
+    'FOCaL': 'tab:red',
+    'Outcome regression': 'tab:blue',
+    'FoS-interaction': 'tab:green',
+    'IPW': 'C4',
+    'Pointwise DR': 'C1',
+    'Basis-wise DR': 'C5'
+}
+
+GRID_KW = dict(alpha=0.35, lw=0.8)
+
+
+def add_grid(ax):
+    """Light grid behind the data, following Figure 2."""
+    ax.set_axisbelow(True)
+    ax.grid(True, which='major', **GRID_KW)
 SCEN_STYLE = {'Correct specification': '-', 'Regression misspecified': '--',
               'Propensity misspecified': '-.', 'Fully misspecified': ':'}
 SCEN_SHORT = {'Correct specification': 'correct', 'Regression misspecified': 'regression miss.',
@@ -183,6 +197,8 @@ def figure_samplesize(m, c, out):
     ax.set_ylabel('$\\mathbb{L}_2$ radius $\\hat c_\\alpha r_n$')
     ax.set_title('(c) Radius of the $\\mathbb{L}_2$ sets versus $n$', loc='left')
     ax.legend(frameon=False, fontsize=9)
+    for ax in axes:
+        add_grid(ax)
 
     frame_all(fig, axes, legend_ncol=2, legend_dy=-0.2)
     fig.savefig(f'{out}/figure_S_samplesize.pdf', bbox_inches='tight')
@@ -205,9 +221,22 @@ def figure_variations(m, c, out):
         # left: ARMSE by design
         ax = axes[r, 0]
         d = mv[(mv.scenario == scen) & (mv.method.isin(methods))]
-        sns.boxplot(data=d, x='design', y='ARMSE', hue='method', order=VARIATION_ORDER, hue_order=methods,
-                    showfliers=False, width=0.75, ax=ax, palette=[METHOD_COLORS[k] for k in methods])
+        sns.boxplot(
+            data=d,
+            x='design',
+            y='ARMSE',
+            hue='method',
+            order=VARIATION_ORDER,
+            hue_order=methods,
+            showfliers=False,
+            width=0.75,
+            linewidth=1.6,
+            ax=ax,
+            palette=METHOD_COLORS
+        )
         ax.set_yscale('log')
+        add_grid(ax)
+        ax.grid(True, which='minor', axis='y', alpha=0.15, lw=0.6)
         ax.set_xlabel('')
         ax.set_xticks(range(len(VARIATION_ORDER)))
         ax.set_xticklabels([VARIATION_LABEL[v] for v in VARIATION_ORDER])
@@ -218,25 +247,104 @@ def figure_variations(m, c, out):
         ax = axes[r, 1]
         d = cv[cv.scenario == scen]
         bars = d.groupby(['design', 'kind'])['cover_L2'].mean().reset_index()
-        kinds = {'F-CATE': 'F-CATE profiles (mean over $q_{0.10}, q_{0.50}, q_{0.90}$)', 'FATE': 'FATE'}
+
+        kinds = {
+            'F-CATE': 'F-CATE profiles (mean over $q_{0.10}, q_{0.50}, q_{0.90}$)',
+            'FATE': 'FATE'
+        }
         bars['kind'] = bars['kind'].map(kinds)
-        sns.barplot(data=bars, x='design', y='cover_L2', hue='kind', order=VARIATION_ORDER,
-                    hue_order=list(kinds.values()), ax=ax, palette='crest')
-        # sparse design: L2-set coverage of the reconstruction-level estimand (stars, one per bar)
+
+        sns.barplot(
+            data=bars,
+            x='design',
+            y='cover_L2',
+            hue='kind',
+            order=VARIATION_ORDER,
+            hue_order=list(kinds.values()),
+            ax=ax,
+            palette=sns.color_palette('viridis', len(kinds)),
+            edgecolor='white',
+            linewidth=1.5,
+            saturation=1,
+            width=0.8
+        )
+
+        # Numerical coverage values above each bar
+        for cont in ax.containers:
+            ax.bar_label(
+                cont,
+                fmt='%.2f',
+                padding=4,
+                fontsize=10
+            )
+
+        # Sparse design: retain reconstruction-level coverage stars
         if 'cover_L2_rec' in d.columns and 'sparse noisy' in VARIATION_ORDER:
             rec = d[d.design == 'sparse noisy'].groupby('kind')['cover_L2_rec'].mean()
             i = VARIATION_ORDER.index('sparse noisy')
+
             for j, kind in enumerate(['F-CATE', 'FATE']):
-                ax.plot(i - 0.2 + 0.4 * j, rec[kind], marker='*', mfc='gold', mec='black', ms=13, ls='None',
-                        label='$\\mathbb{L}_2$ set, effect on reconstructed curves' if j == 0 else None)
-        ax.axhline(0.95, color='black', ls='--', lw=1)
-        ax.set_ylim(0, 1.05)
-        ax.set_xlabel('')
-        ax.set_xticks(range(len(VARIATION_ORDER)))
-        ax.set_xticklabels([VARIATION_LABEL[v] for v in VARIATION_ORDER])
-        ax.set_ylabel('$\\mathbb{L}_2$-set coverage')
-        ax.set_title(f'({next(letters)}) Coverage of the $\\mathbb{{L}}_2$ sets, {SCEN_SHORT[scen]}', loc='left')
-        ax.legend(frameon=False, ncol=3, loc='upper center', bbox_to_anchor=(0.5, -0.2), fontsize=10)
+                ax.plot(
+                    i - 0.2 + 0.4 * j,
+                    rec[kind],
+                    marker='*',
+                    mfc='gold',
+                    mec='black',
+                    ms=13,
+                    ls='None',
+                    zorder=10,
+                    label='$\\mathbb{L}_2$ set, effect on reconstructed curves' if j == 0 else None
+                )
+
+                # Nominal coverage and Monte Carlo uncertainty band
+                alpha = 0.05
+                n_trials = d['trial'].nunique()
+                mc = 1.96 * np.sqrt(alpha * (1 - alpha) / n_trials)
+
+                ax.axhspan(
+                    0.95 - mc,
+                    0.95 + mc,
+                    color='black',
+                    alpha=0.10,
+                    zorder=0,
+                    lw=0
+                )
+
+                ax.axhline(
+                    0.95,
+                    color='black',
+                    ls='--',
+                    lw=1.8,
+                    zorder=1,
+                    label='Nominal 95%'
+                )
+
+            ax.set_ylim(0, 1.2)
+            ax.set_yticks(np.arange(0, 1.01, 0.2))
+            ax.set_xlabel('')
+            ax.set_xticks(range(len(VARIATION_ORDER)))
+            ax.set_xticklabels([VARIATION_LABEL[v] for v in VARIATION_ORDER])
+            ax.set_ylabel('$\\mathbb{L}_2$-set coverage')
+
+            add_grid(ax)
+            ax.grid(False, axis='x')
+
+            sns.despine(ax=ax)
+
+            ax.set_title(
+                f'({next(letters)}) Coverage of the $\\mathbb{{L}}_2$ sets, {SCEN_SHORT[scen]}',
+                loc='left'
+            )
+
+            ax.legend(
+                frameon=False,
+                ncol=3,
+                loc='upper center',
+                bbox_to_anchor=(0.5, -0.2),
+                fontsize=10
+            )
+    for ax in axes.flat:
+        add_grid(ax)
     frame_all(fig, axes, legend_ncol=3, legend_dy=-0.28, h_pad=8.0)
     fig.savefig(f'{out}/figure_S_variations.pdf', bbox_inches='tight')
     fig.savefig(f'{out}/figure_S_variations.png', dpi=110, bbox_inches='tight')
@@ -308,6 +416,8 @@ def figure_diagnostics(m, c, out):
     ax.set_ylabel('$\\mathbb{L}_2$ radius')
     ax.set_title('(d) Radius across replications, correct specification', loc='left')
 
+    for ax in axes:
+        add_grid(ax)
     frame_all(fig, axes, legend_ncol=2, legend_dy=-0.3)
     fig.savefig(f'{out}/figure_S_diagnostics.pdf', bbox_inches='tight')
     fig.savefig(f'{out}/figure_S_diagnostics.png', dpi=110, bbox_inches='tight')
@@ -327,8 +437,19 @@ def figure_pointwise(m, c, out):
     fig, axes = plt.subplots(1, 4, figsize=(27, 5.4))
     # (a) ARMSE
     ax = axes[0]
-    sns.boxplot(data=d[d.method.isin(methods)], x='scenario', y='ARMSE', hue='method', order=order, hue_order=methods,
-                showfliers=False, width=0.75, ax=ax, palette=[METHOD_COLORS[k] for k in methods])
+    sns.boxplot(
+        data=d[d.method.isin(methods)],
+        x='scenario',
+        y='ARMSE',
+        hue='method',
+        order=order,
+        hue_order=methods,
+        showfliers=False,
+        width=0.75,
+        linewidth=1.6,
+        ax=ax,
+        palette=METHOD_COLORS
+    )
     ax.set_xticks(range(4)); ax.set_xticklabels(short); ax.set_xlabel('')
     ax.set_title('(a) ARMSE with boosting nuisances', loc='left'); ax.legend(frameon=False, fontsize=9)
     # (b) runtime of the fit
@@ -355,6 +476,8 @@ def figure_pointwise(m, c, out):
         ax.set_title(title, loc='left'); ax.legend(frameon=False, fontsize=9)
     axes[3].axhline(0.95, color='black', ls='--', lw=1); axes[3].set_ylim(0, 1.05)
     axes[3].legend(frameon=False, fontsize=9, loc='lower right')
+    for ax in axes:
+        add_grid(ax)
     frame_all(fig, axes, legend_ncol=2, legend_dy=-0.3)
     fig.savefig(f'{out}/figure_S_pointwise.pdf', bbox_inches='tight')
     fig.savefig(f'{out}/figure_S_pointwise.png', dpi=110, bbox_inches='tight')
@@ -362,7 +485,7 @@ def figure_pointwise(m, c, out):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--out', type=str, default='results')
+    parser.add_argument('--out', type=str, default='simulations/results')
     args = parser.parse_args()
     os.makedirs(args.out, exist_ok=True)
     m, c = load(args.out)
