@@ -221,8 +221,8 @@ def main():
     else:
         print(f'WARNING: no metrics_base/coverage_base in {args.out}; panels (e)-(f) will be empty')
 
-    fig = plt.figure(figsize=(22, 28))
-    gs = gridspec.GridSpec(4, 2, figure=fig, height_ratios=[1, 0.8, 1, 1.3], hspace=1.1, wspace=0.3)
+    fig = plt.figure(figsize=(25, 21))
+    gs = gridspec.GridSpec(4, 2, figure=fig, height_ratios=[1, 0.65, 1, 1.15], hspace=1.5, wspace=0.3)
 
     # (a) outcome prediction
     ax_a1 = fig.add_subplot(gs[0, 0])
@@ -256,10 +256,10 @@ def main():
     # (d) estimated F-CATE surface (correct specification)
     ax_d = fig.add_subplot(gs[3, 0], projection='3d')
     surf, zlim = panel_surface(ax_d, fits['Correct specification'], coef, cfg)
-    cbar_d = fig.colorbar(surf, ax=ax_d, shrink=0.5, aspect=12, pad=0.28)
+    cbar_d = fig.colorbar(surf, ax=ax_d, shrink=0.8, aspect=12, pad=0.28)
     cbar_d.set_label(r'$\hat{\theta}$', labelpad=-15)    
     p = ax_d.get_position()
-    ax_d.set_position([p.x0 - 0.065, p.y0 - 0.045, p.width * 1.60, p.height * 1.4])
+    ax_d.set_position([p.x0 - 0.065, p.y0 - 0.075, p.width * 2.10, p.height * 1.85])
 
 
 
@@ -279,6 +279,18 @@ def main():
     for a in (ax_c, ax_e, ax_d, cbar_d.ax, ax_f):
         p = a.get_position(); a.set_position([p.x0, p.y0 + shift, p.width, p.height])
     fig.canvas.draw(); rend = fig.canvas.get_renderer()
+        # --- vertical tweaks (figure fractions) ---
+    CUT_A,  GROW_B  = 0.020, 0.020    # (a) bottom frame up  /  (b) densities taller (top moves up)
+    CUT_CE, GROW_DF = 0.020, 0.020    # (c),(e) bottom frame up  /  (d),(f) taller (top moves up)
+
+    def grow_up(a, dh):               # keep the bottom edge fixed, extend the top edge upward
+        p = a.get_position()
+        a.set_position([p.x0, p.y0, p.width, p.height + dh])
+
+    for a in axes_b:
+        grow_up(a, GROW_B)
+    for a in (ax_d, cbar_d.ax, ax_f):
+        grow_up(a, GROW_DF)
     ba1, ba2 = tight(ax_a1), tight(ax_a2)
     bb = Bbox.union([tight(a) for a in axes_b])
     bc, be, bf = tight(ax_c), tight(ax_e), tight(ax_f)
@@ -288,10 +300,11 @@ def main():
     x_right = max(ba2.x1, bb.x1, be.x1, bf.x1)          # common right edge of (a), (b), (e), (f)
     xe_left = min(be.x0, bf.x0)                         # common left edge of (e) and (f)
 
-    block_frame(fig, Bbox([[x_left, ya.y0], [x_right, ya.y1]]), '(a) Outcome prediction', mask_frac=0.25)
+    block_frame(fig, Bbox([[x_left, ya.y0 + CUT_A], [x_right, ya.y1]]), '(a) Outcome prediction', mask_frac=0.25)
     block_frame(fig, Bbox([[x_left, bb.y0], [x_right, bb.y1]]), '(b) Covariate densities', mask_frac=0.25)
-    block_frame(fig, Bbox([[x_left, y0], [bc.x1, y1]]), '(c) Estimated FATE over time', mask_frac=0.6)
-    block_frame(fig, Bbox([[xe_left, y0], [x_right, y1]]), '(e) ARMSE under different model specifications', mask_frac=0.9)
+    block_frame(fig, Bbox([[x_left, y0 + CUT_CE], [bc.x1, y1]]), '(c) Estimated FATE over time', mask_frac=0.6)
+    block_frame(fig, Bbox([[xe_left, y0 + CUT_CE], [x_right, y1]]), '(e) ARMSE under different model specifications', mask_frac=0.9)
+    # (d) and (f) are unchanged: they take their height from bf, which now includes GROW_DF
     bd = Bbox([[x_left, bf.y0], [bc.x1, bf.y1]])         # same width as (c), same height as (f)
     block_frame(fig, bd, '(d) Estimated F-CATE surface along $X_1$ and time', mask_frac=0.9)
     block_frame(fig, Bbox([[xe_left, bf.y0], [x_right, bf.y1]]), '(f) Coverage of the 95% $\\mathbb{L}_2$ confidence sets', mask_frac=0.9)
