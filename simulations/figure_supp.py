@@ -28,6 +28,7 @@ import pandas as pd
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from matplotlib.ticker import ScalarFormatter, NullLocator, NullFormatter
 import seaborn as sns
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))   # FOCaL.py at the repository root
@@ -39,7 +40,7 @@ plt.rcParams.update({'font.size': 12, 'axes.titlesize': 14, 'axes.labelsize': 12
 METHOD_COLORS = {
     'FOCaL': '#C52C2C',
     'Outcome regression': '#3A7DC0',
-    'FoS-interaction': '#6B4A39',
+    'FoS-interaction': "#C0BB2F",
     'IPW': '#57AF41',
     'Pointwise DR': '#CB832A',
     'Basis-wise DR': '#57AF41'
@@ -93,7 +94,7 @@ from matplotlib.patches import FancyBboxPatch  # noqa: E402
 from matplotlib.transforms import Bbox  # noqa: E402
 
 
-def block_frame(fig, bbox, title, pad_x=0.012, pad_y=0.012, extra_top=1.6):
+def block_frame(fig, bbox, title, pad_x=0.012, pad_y=0.012, extra_top=1.6, title_fs=14):
     """Rounded frame around a block of axes with the title centred on its top edge."""
     rend = fig.canvas.get_renderer()
     x0, y0 = bbox.x0 - pad_x, bbox.y0 - pad_y
@@ -101,18 +102,15 @@ def block_frame(fig, bbox, title, pad_x=0.012, pad_y=0.012, extra_top=1.6):
     fig.add_artist(FancyBboxPatch((x0, y0), w, h, boxstyle='round,pad=0.006,rounding_size=0.015',
                                   transform=fig.transFigure, fill=False, lw=1.5, edgecolor='grey', zorder=2))
     tx, ty = x0 + w / 2, y0 + h + 0.003
-    t = fig.text(tx, ty, title, ha='center', va='center', fontsize=14, weight='bold', zorder=4)
+    t = fig.text(tx, ty, title, ha='center', va='center', fontsize=title_fs, weight='bold', zorder=4)
     tb = t.get_window_extent(rend).transformed(fig.transFigure.inverted())
     fig.add_artist(FancyBboxPatch((tb.x0 - 0.006, ty - 0.009), tb.width + 0.012, 0.018,
                                   boxstyle='round,pad=0.0,rounding_size=0.006', transform=fig.transFigure,
                                   facecolor='white', edgecolor='none', zorder=3))
 
 
-def frame_all(fig, axes, legend_ncol=3, legend_dy=-0.2, h_pad=6.0, w_pad=7.0):
-    """
-    Turn each axis title into a frame title, move each legend below its axis, lay the figure out
-    and draw one frame per axis (twin axes and colorbars sharing the position are included).
-    """
+def frame_all(fig, axes, legend_ncol=3, legend_dy=-0.2, h_pad=6.0, w_pad=7.0,
+              title_fs=14, legend_fs=None, align_cols=False, pad_x=0.012):
     axes = [a for a in np.ravel(axes)]
     titles = []
     for ax in axes:
@@ -122,7 +120,7 @@ def frame_all(fig, axes, legend_ncol=3, legend_dy=-0.2, h_pad=6.0, w_pad=7.0):
         if leg is not None:
             handles = getattr(leg, 'legend_handles', None) or leg.legendHandles
             labels = [t.get_text() for t in leg.get_texts()]
-            size = leg.get_texts()[0].get_fontsize() if leg.get_texts() else None
+            size = legend_fs or (leg.get_texts()[0].get_fontsize() if leg.get_texts() else None)
             leg.remove()
             ax.legend(handles, labels, frameon=False, ncol=min(len(labels), legend_ncol), loc='upper center',
                       bbox_to_anchor=(0.5, legend_dy), fontsize=size)
@@ -135,13 +133,16 @@ def frame_all(fig, axes, legend_ncol=3, legend_dy=-0.2, h_pad=6.0, w_pad=7.0):
         pos = ax.get_position()
         twins = [a for a in fig.axes if a is not ax and a.get_position().overlaps(pos) and a not in axes]
         boxes.append(Bbox.union([tight(ax)] + [tight(a) for a in twins]))
-    # frames on the same row share the same vertical extent
     rows = [round(ax.get_position().y0, 2) for ax in axes]
-    for ax, title, bb, r in zip(axes, titles, boxes, rows):
+    cols = [round(ax.get_position().x0, 2) for ax in axes]
+    for ax, title, bb, r, cl in zip(axes, titles, boxes, rows, cols):
         same = [b_ for b_, r_ in zip(boxes, rows) if r_ == r]
         y0, y1 = min(b_.y0 for b_ in same), max(b_.y1 for b_ in same)
-        block_frame(fig, Bbox([[bb.x0, y0], [bb.x1, y1]]), title)
-
+        x0, x1 = bb.x0, bb.x1
+        if align_cols:   # frames in the same column share left and right edges
+            col = [b_ for b_, c_ in zip(boxes, cols) if c_ == cl]
+            x0, x1 = min(b_.x0 for b_ in col), max(b_.x1 for b_ in col)
+        block_frame(fig, Bbox([[x0, y0], [x1, y1]]), title, title_fs=title_fs, pad_x=pad_x)
 
 def figure_samplesize(m, c, out):
     ms, cs = m[m.n.notna()], c[(c.n.notna()) & (c.method == 'FOCaL')]
@@ -199,8 +200,12 @@ def figure_samplesize(m, c, out):
     ax.legend(frameon=False, fontsize=9)
     for ax in axes:
         add_grid(ax)
+        ax.set_xticks([500, 1000, 2000, 5000])
+        ax.xaxis.set_major_formatter(ScalarFormatter())
+        ax.xaxis.set_minor_locator(NullLocator())
+        ax.xaxis.set_minor_formatter(NullFormatter())
 
-    frame_all(fig, axes, legend_ncol=2, legend_dy=-0.2)
+    frame_all(fig, axes, legend_ncol=2, legend_dy=-0.2, title_fs=17, legend_fs=13)
     fig.savefig(f'{out}/figure_S_samplesize.pdf', bbox_inches='tight')
     fig.savefig(f'{out}/figure_S_samplesize.png', dpi=110, bbox_inches='tight')
 
@@ -345,7 +350,8 @@ def figure_variations(m, c, out):
             )
     for ax in axes.flat:
         add_grid(ax)
-    frame_all(fig, axes, legend_ncol=3, legend_dy=-0.28, h_pad=8.0)
+    frame_all(fig, axes, legend_ncol=3, legend_dy=-0.28, h_pad=8.0, w_pad=3.0,
+          title_fs=17, legend_fs=13, align_cols=True, pad_x=0.006)
     fig.savefig(f'{out}/figure_S_variations.pdf', bbox_inches='tight')
     fig.savefig(f'{out}/figure_S_variations.png', dpi=110, bbox_inches='tight')
 
@@ -418,7 +424,8 @@ def figure_diagnostics(m, c, out):
 
     for ax in axes:
         add_grid(ax)
-    frame_all(fig, axes, legend_ncol=2, legend_dy=-0.3)
+    frame_all(fig, axes, legend_ncol=2, legend_dy=-0.3,
+          title_fs=14, legend_fs=13)
     fig.savefig(f'{out}/figure_S_diagnostics.pdf', bbox_inches='tight')
     fig.savefig(f'{out}/figure_S_diagnostics.png', dpi=110, bbox_inches='tight')
 
@@ -478,7 +485,7 @@ def figure_pointwise(m, c, out):
     axes[3].legend(frameon=False, fontsize=9, loc='lower right')
     for ax in axes:
         add_grid(ax)
-    frame_all(fig, axes, legend_ncol=2, legend_dy=-0.3)
+    frame_all(fig, axes, legend_ncol=2, legend_dy=-0.3, title_fs=14, legend_fs=13)
     fig.savefig(f'{out}/figure_S_pointwise.pdf', bbox_inches='tight')
     fig.savefig(f'{out}/figure_S_pointwise.png', dpi=110, bbox_inches='tight')
 
