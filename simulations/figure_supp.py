@@ -110,7 +110,7 @@ def block_frame(fig, bbox, title, pad_x=0.012, pad_y=0.012, extra_top=1.6, title
 
 
 def frame_all(fig, axes, legend_ncol=3, legend_dy=-0.2, h_pad=6.0, w_pad=7.0,
-              title_fs=14, legend_fs=None, align_cols=False, pad_x=0.012):
+              title_fs=14, legend_fs=None, align_cols=False, pad_x=0.012, shifts=None):
     axes = [a for a in np.ravel(axes)]
     titles = []
     for ax in axes:
@@ -125,6 +125,10 @@ def frame_all(fig, axes, legend_ncol=3, legend_dy=-0.2, h_pad=6.0, w_pad=7.0,
             ax.legend(handles, labels, frameon=False, ncol=min(len(labels), legend_ncol), loc='upper center',
                       bbox_to_anchor=(0.5, legend_dy), fontsize=size)
     fig.tight_layout(h_pad=h_pad, w_pad=w_pad)
+    if shifts:   # {axis index: horizontal shift in figure fraction}, applied after the layout
+        for i, dx in shifts.items():
+            p = axes[i].get_position()
+            axes[i].set_position([p.x0 + dx, p.y0, p.width, p.height])
     fig.canvas.draw()
     rend = fig.canvas.get_renderer()
     tight = lambda a: a.get_tightbbox(rend).transformed(fig.transFigure.inverted())
@@ -205,7 +209,8 @@ def figure_samplesize(m, c, out):
         ax.xaxis.set_minor_locator(NullLocator())
         ax.xaxis.set_minor_formatter(NullFormatter())
 
-    frame_all(fig, axes, legend_ncol=2, legend_dy=-0.2, title_fs=17, legend_fs=13)
+    frame_all(fig, axes, legend_ncol=2, legend_dy=-0.2, title_fs=17, legend_fs=12,
+          shifts={1: 0.025})
     fig.savefig(f'{out}/figure_S_samplesize.pdf', bbox_inches='tight')
     fig.savefig(f'{out}/figure_S_samplesize.png', dpi=110, bbox_inches='tight')
 
