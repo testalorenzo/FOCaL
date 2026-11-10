@@ -1,6 +1,7 @@
 # FOCaL: Functional Outcome Causal Learning
 
-Code for the paper
+Code for the paper <img width="193" height="20" alt="image" src="https://github.com/user-attachments/assets/6cf4f010-7be2-479b-8808-d8bc512d9ffb" />
+
 
 > F. Salmaso, L. Testa, F. Chiaromonte. *A Doubly Robust Machine Learning Approach for Disentangling Treatment Effect Heterogeneity with Functional Outcomes.* [arXiv:2602.11118](https://arxiv.org/abs/2602.11118)
 
